@@ -6,10 +6,14 @@ import sys
 LogLevel: TypeAlias = Literal["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
-def create_logger(logger_name: str,
-                  logger_level: int | LogLevel = 20,
-                  file_name: PathLike | str | None = None) -> logging.Logger:
-    """"""
+def create_logger(
+        logger_name: str,
+        logger_level: int | LogLevel = 20,
+        file_name: PathLike | str | None = None,
+) -> logging.Logger:
+    """Create flexible logger, that can handle with different levels. Also,
+    it can write log into the file or stdout."""
+
     logger = logging.getLogger(logger_name)
     logger.setLevel(logger_level)
 
