@@ -37,7 +37,7 @@ class Cities(WorldCities):
         The more cities you get, the less min_population you set"""
 
         assert quantity > 0  # TODO add custom exception, log
-        largest_cities: Iterator = (
+        largest_cities: Iterator[dict] = (
             city for city in self.world_cities.values()
             if city["population"] >= min_population
         )
