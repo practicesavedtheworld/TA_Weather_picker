@@ -1,2 +1,0 @@
-from .weather_picker.schemas import WeatherDataSchemeFromOpenWeather
-from config.logger import create_logger
