@@ -43,3 +43,18 @@ class Cities(WorldCities):
         )
 
         return self.sort_cities_by_population(largest_cities)[-quantity:]
+
+    def get_largest_cities_names(self, quantity: int = 100, min_population: int = 1_000_000) -> list[dict]:
+        return [
+            city["name"] for city in self.get_largest_cities_by_quantity(
+                quantity=quantity,
+                min_population=min_population,
+            )
+        ]
+
+
+try:
+    cities = Cities()
+except:
+    #  TODO handle tnhis
+    ...
