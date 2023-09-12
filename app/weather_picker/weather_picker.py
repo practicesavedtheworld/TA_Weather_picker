@@ -45,7 +45,7 @@ class WeatherPickerWithSubscription(WeatherPicker):
         async with self._session:
             try:
                 tasks = []
-                for city in cities.get_largest_cities_names(quantity=5):
+                for city in cities.get_largest_cities_names():
                     url = self._url.format(city_name=city, api_key=api_key)
                     tasks.append(asyncio.create_task(self.fetch_weather(self._session, url)))
                 responses = await asyncio.gather(*tasks)  # type ignore
@@ -81,5 +81,3 @@ class WeatherPickerWithoutSubscription(WeatherPicker):
         except (HTTPError, ConnectionError) as req_err:
             # TODO: add custom exception handling
             logger.error(f"Connection refused or there is some HTTP error: {req_err}")
-
-
