@@ -1,3 +1,4 @@
+import functools
 from typing import Iterator, Optional, Iterable
 from abc import ABC, abstractmethod
 
@@ -14,11 +15,11 @@ class WorldCities(ABC):
         return cls._cities_instance
 
     @staticmethod
-    def sort_cities_by_population(cities: Iterable) -> list[dict]:
+    def sort_cities_by_population(cities_seq: Iterable) -> list[dict]:
         """Sorting cities by population"""
 
         return sorted(
-            cities,
+            cities_seq,
             key=lambda cur_city: cur_city["population"],
         )
 
@@ -44,6 +45,7 @@ class Cities(WorldCities):
 
         return self.sort_cities_by_population(largest_cities)[-quantity:]
 
+    @functools.lru_cache(maxsize=20)
     def get_largest_cities_names(self, quantity: int = 100, min_population: int = 1_000_000) -> list[dict]:
         return [
             city["name"] for city in self.get_largest_cities_by_quantity(
