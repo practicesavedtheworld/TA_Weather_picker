@@ -1,15 +1,9 @@
-import datetime
-import decimal
-from typing import TypeAlias, Annotated
+from typing import Annotated
 
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import sql, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import ForeignKey
 
-Base: TypeAlias = DeclarativeBase
-Now: TypeAlias = Annotated[datetime.datetime, mapped_column(default_factory=sql.func.now)]
-Float: TypeAlias = float | decimal.Decimal
-Coordinates: TypeAlias = Annotated[float, mapped_column(
-    nullable=True)]
+from app.types import SQL_FLOAT, Base, Coordinates, Now, SQL_INT
 
 
 class BaseWeather(Base):
@@ -37,6 +31,16 @@ class CityTimestamp:
 
 class MainWeather(BaseWeather):
     __tablename__ = "main_weather"
+
+    city_id: Mapped[Annotated[int, mapped_column(ForeignKey("city.id"))]]
+    feels_like: Mapped[SQL_FLOAT]
+    grnd_level: Mapped[SQL_INT]
+    humidity: Mapped[SQL_INT]
+    pressure: Mapped[SQL_INT]
+    sea_level: Mapped[SQL_INT]
+    temp: Mapped[SQL_FLOAT]
+    temp_max: Mapped[SQL_FLOAT]
+    temp_min: Mapped[SQL_FLOAT]
 
 
 class ExtraWeather(BaseWeather):
