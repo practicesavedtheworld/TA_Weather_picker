@@ -1,9 +1,6 @@
-from typing import TypeAlias
-import decimal
-
 from pydantic import BaseModel
 
-Float: TypeAlias = float | decimal.Decimal
+from app.types import Float
 
 
 class Coordinates(BaseModel):
