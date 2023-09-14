@@ -8,4 +8,5 @@ from .sql_types.types import (
     Coordinates,
     SQL_FLOAT,
     SQL_INT,
+    SQL_JSON,
 )
