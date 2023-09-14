@@ -1,9 +1,9 @@
 from typing import Annotated
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
 
-from app.types import SQL_FLOAT, Base, Coordinates, Now, SQL_INT
+from app.types import SQL_FLOAT, Base, Coordinates, Now, SQL_INT, SQL_JSON
 
 
 class BaseWeather(Base):
@@ -21,7 +21,7 @@ class CityModel(BaseWeather):
     country: Mapped[Annotated[str, mapped_column(nullable=True)]]
 
 
-class CityTimestamp:
+class CityTimestamp(BaseWeather):
     __tablename__ = "city_timestamp"
 
     city_id: Mapped[Annotated[int, mapped_column(ForeignKey("city.id"))]]
@@ -45,3 +45,8 @@ class MainWeather(BaseWeather):
 
 class ExtraWeather(BaseWeather):
     __tablename__ = "extra_weather"
+
+    city_id: Mapped[Annotated[int, mapped_column(ForeignKey("main_weather.city_id"))]]
+    visibility: Mapped[SQL_INT]
+    wind: Mapped[SQL_JSON]
+    recorded_at: Mapped[Now]
