@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from app.types import Float
+from app.types import Float, FLOAT_OR_INT
 
 
 class Coordinates(BaseModel):
@@ -21,10 +21,16 @@ class WeatherDataSchemeFromOpenWeather(BaseModel):
     coord: Coordinates
     dt: int
     id: int
-    main: dict[str, int | Float]
+    main: dict[str, FLOAT_OR_INT]
     name: str
     sys: dict
     timezone: int
     visibility: int
     weather: list[Weather]
-    wind: dict[str, int | Float]
+    wind: dict[str, FLOAT_OR_INT]
+
+
+class WindCondition:
+    degree: FLOAT_OR_INT = Field(default=0, ge=0, lt=361)
+    gust: FLOAT_OR_INT = Field(default=0., ge=0)
+    speed: FLOAT_OR_INT = Field(ge=0)
