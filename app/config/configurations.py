@@ -2,13 +2,13 @@ from pathlib import Path
 from typing import Self
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic_settings.sources import SettingsError
+from pydantic import ValidationError
 
 from app.config import create_logger
 
 BASE_DIR: Path = Path(__file__).parent.parent.parent
 logger = create_logger(
-    "settings_logger",
+    logger_name="settings_logger",
     logger_level="INFO",
 )
 
@@ -23,10 +23,10 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         #  File priority direction is from right to left side
-        #  So the first file for search would be .test_env
+        #  So the first file for search would be .env
         #  The direction must change closer to release.
-        env_file=[f"{BASE_DIR}.env", f"{BASE_DIR}.test_env"],
-        env_file_encoding="UTF-8"
+        env_file=[f"{BASE_DIR.joinpath('.env')}", f"{BASE_DIR.joinpath('.test_env')}"],
+        env_file_encoding="UTF-8",
     )
 
     def __init__(self: Self, **kwargs):
@@ -45,6 +45,6 @@ class Settings(BaseSettings):
 try:
     settings = Settings()
     logger.info("Settings parse complete")
-except SettingsError as settings_err:
+except ValidationError as settings_err:
     logger.critical("Settings does not match. Further application normal work is impossible", exc_info=settings_err)
     # TODO  add custom exception
