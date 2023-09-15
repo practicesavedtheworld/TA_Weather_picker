@@ -3,7 +3,7 @@ from typing import TypeAlias, Literal
 import logging
 import sys
 
-LogLevel: TypeAlias = Literal["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+from app.types import LogLevel
 
 
 def create_logger(

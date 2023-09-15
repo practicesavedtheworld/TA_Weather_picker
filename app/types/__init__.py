@@ -10,4 +10,4 @@ from .sql_types.types import (
     SQL_INT,
     SQL_JSON,
 )
-from .state_types.types import connected
+from .state_types.types import connected, LogLevel
