@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Self
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings.sources import SettingsError
 
 from app.config import create_logger
 
@@ -44,6 +45,6 @@ class Settings(BaseSettings):
 try:
     settings = Settings()
     logger.info("Settings parse complete")
-except:
-    logger.critical("Settings does not match. Further application normal work is impossible")
+except SettingsError as settings_err:
+    logger.critical("Settings does not match. Further application normal work is impossible", exc_info=settings_err)
     # TODO  add custom exception
