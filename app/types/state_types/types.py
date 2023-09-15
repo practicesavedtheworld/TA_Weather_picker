@@ -1,0 +1,1 @@
+connected: bool | None = None
