@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey
 
 from app.types import SQL_FLOAT, Base, Coordinates, Now, SQL_INT, SQL_JSON
@@ -32,7 +32,7 @@ class CityTimestamp(BaseWeather):
 class MainWeather(BaseWeather):
     __tablename__ = "main_weather"
 
-    city_id: Mapped[Annotated[int, mapped_column(ForeignKey("city.id"))]]
+    city_id: Mapped[Annotated[int, mapped_column(ForeignKey("city.id"), unique=True)]]
     feels_like: Mapped[SQL_FLOAT]
     grnd_level: Mapped[SQL_INT]
     humidity: Mapped[SQL_INT]
