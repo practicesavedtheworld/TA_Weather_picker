@@ -1,12 +1,14 @@
+import datetime
 from typing import TypeAlias, Annotated
 
 from sqlalchemy import sql
-from sqlalchemy.orm import DeclarativeBase, mapped_column
-from sqlalchemy.types import FLOAT, DECIMAL, INTEGER, DATETIME, JSON
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import mapped_column, declarative_base
 
-Base: TypeAlias = DeclarativeBase
-Now: TypeAlias = Annotated[DATETIME, mapped_column(default_factory=sql.func.now)]
-Coordinates: TypeAlias = Annotated[FLOAT, mapped_column(nullable=True)]
-SQL_FLOAT: TypeAlias = Annotated[FLOAT | DECIMAL, mapped_column(nullable=True, default=0.)]
-SQL_INT: TypeAlias = Annotated[INTEGER, mapped_column(nullable=True, default=0)]
-SQL_JSON: TypeAlias = Annotated[JSON, mapped_column(default={})]
+
+Base: TypeAlias = declarative_base()  # For some reason DeclarativeBase didn't work.
+Now: TypeAlias = Annotated[datetime.datetime, mapped_column(default_factory=sql.func.now)]
+Coordinates: TypeAlias = Annotated[float, mapped_column(nullable=True)]
+SQL_FLOAT: TypeAlias = Annotated[float, mapped_column(nullable=True, default=0.)]
+SQL_INT: TypeAlias = Annotated[int, mapped_column(nullable=True, default=0)]
+SQL_JSON: TypeAlias = Annotated[JSONB, mapped_column(JSONB, default={})]
