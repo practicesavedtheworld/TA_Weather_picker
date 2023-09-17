@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 from app.types import Float, FLOAT_OR_INT
@@ -30,7 +32,40 @@ class WeatherDataSchemeFromOpenWeather(BaseModel):
     wind: dict[str, FLOAT_OR_INT]
 
 
-class WindCondition:
-    degree: FLOAT_OR_INT = Field(default=0, ge=0, lt=361)
-    gust: FLOAT_OR_INT = Field(default=0., ge=0)
-    speed: FLOAT_OR_INT = Field(ge=0)
+class CityModelScheme(BaseModel):
+    name: str
+    longitude: Float
+    latitude: Float
+    country: str
+
+
+class CityTimestampScheme(BaseModel):
+    city_id: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class MainWeatherScheme(BaseModel):
+    city_id: int
+    feels_like: Float
+    grnd_level: int
+    humidity: int
+    pressure: int
+    sea_level: int
+    temp: Float
+    temp_max: Float
+    temp_min: Float
+
+
+class ExtraWeatherScheme(BaseModel):
+    city_id: int
+    visibility: int
+    wind: dict[str, FLOAT_OR_INT]
+    recorded_at: datetime
+
+
+
+# class WindCondition:
+#     degree: FLOAT_OR_INT = Field(default=0, ge=0, lt=361)
+#     gust: FLOAT_OR_INT = Field(default=0., ge=0)
+#     speed: FLOAT_OR_INT = Field(ge=0)
