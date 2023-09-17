@@ -15,7 +15,7 @@ class BaseWeather(Base):
 class CityModel(BaseWeather):
     __tablename__ = "city"
 
-    name: Mapped[Annotated[str, mapped_column(nullable=False)]]
+    name: Mapped[Annotated[str, mapped_column(nullable=False, unique=True)]]
     longitude: Mapped[Coordinates]
     latitude: Mapped[Coordinates]
     country: Mapped[Annotated[str, mapped_column(nullable=True)]]
