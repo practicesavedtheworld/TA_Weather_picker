@@ -27,7 +27,10 @@ class CityDataMapper(ABC):
 
     @staticmethod
     @abstractmethod
-    def map_main_weather(weather_data: WeatherDataSchemeFromOpenWeather) -> MainWeatherScheme:
+    def map_main_weather(weather_data: WeatherDataSchemeFromOpenWeather) -> tuple[
+        MainWeatherScheme,
+        WeatherDataSchemeFromOpenWeather,
+    ]:
         ...
 
     @staticmethod
