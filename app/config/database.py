@@ -14,7 +14,7 @@ try:
     session: AsyncSession = async_sessionmaker(
         bind=async_engine,
         expire_on_commit=False,
-    )  # type ignore
+    )()  # type ignore
     logger.info("Create engine. Ready to use")
     connected = True
 except SQLAlchemyError as db_err:
