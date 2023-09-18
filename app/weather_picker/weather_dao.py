@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import insert, exists
+from sqlalchemy import insert, exists, select, update
 
 from app.config import session
 from app.weather_picker import WeatherDataSchemeFromOpenWeather, CityModelScheme, CityTimestampScheme, \
@@ -45,17 +45,17 @@ class CityDataMapperImpl(CityDataMapper):
     def map_city(weather_data: WeatherDataSchemeFromOpenWeather) -> CityModelScheme:
         """ """
 
-        name = weather_data["name"]
-        city_coordinates: dict[str, float] = weather_data["coord"]
+        name = weather_data.name
+        city_coordinates: dict[str, float] = weather_data.coord.model_dump()
         longitude, latitude = city_coordinates.get("lon", 0.), city_coordinates.get("lat", 0.)
-        county = weather_data["sys"].get("country")
+        country = weather_data.sys.get("country")
 
         return CityModelScheme(
             **dict(
                 name=name,
                 latitude=latitude,
                 longitude=longitude,
-                county=county,
+                country=country,
             ))
 
     @staticmethod
@@ -78,9 +78,7 @@ class CityDataMapperImpl(CityDataMapper):
     ]:
         """ """
 
-        return MainWeatherScheme(
-            **weather_data.get("main")
-        ), weather_data
+        return weather_data.model_dump().get("main"), weather_data
 
     @staticmethod
     def map_extra_weather(weather_data: WeatherDataSchemeFromOpenWeather, city_id: int) -> ExtraWeatherScheme:
@@ -133,70 +131,77 @@ class BaseWeatherDatabase:
         return weather_data
 
 
-##########################################
-##          Insert Operations           ##
-##########################################
+###################################################
+##          Insert / Update Operations           ##
+###################################################
 
 
 class WeatherLoaderToDatabase:
-    def __init__(self, weather: list[WeatherDataSchemeFromOpenWeather], client_session: AsyncSession) -> None:
+    def __init__(self, weather: list[WeatherDataSchemeFromOpenWeather]) -> None:
         self.base_weather: BaseWeatherDatabase = BaseWeatherDatabase(
             weather=weather,
-            client_session=client_session,
+
         )
         self.weather_data = self.base_weather.weather_data
         self.data_mapper_link = self.base_weather.city_data_mapper
 
-    async def push_weather_to_db(self):
+    async def push_weather_to_db(self) -> None:
         """ """
-
         async with self.base_weather.client_session as push_session:
-            for city, main_weather in self.weather_data:
-                try:
-                    await push_session.begin()
-                    #  Begin Transaction
+            try:
 
-                    is_city_exist_in_citymodel = exists().where(city["name"] == CityModel.name)
-                    if not is_city_exist_in_citymodel:
-                        #  CityModel
-                        push_city_ret_id_query = (
-                            insert(CityModel)
-                            .values(**city)
-                            .returning(CityModel.id)
-                        )
-                        push_city_ret_id_query_result = await push_session.execute(push_city_ret_id_query)
-                        city_id = push_city_ret_id_query_result.scalar()
-                        is_city_exist_in_citytimestamp = exists().where(CityTimestamp.city_id == city_id)
+                async with push_session.begin():
+                    for city, main_weather in self.weather_data:
+                        city_id = await self.get_or_create_city(push_session, city)
+                        await self.update_city_timestamp(push_session, city_id)
+                        await self.push_main_weather(push_session, city_id, main_weather[0])
+                        await self.push_extra_weather(push_session, city_id, main_weather[1])
+            except Exception as e:
+                # handle this
+                ...
 
-                        if not is_city_exist_in_citytimestamp:
-                            #  CityTimestamp
-                            city_timestamp = self.data_mapper_link.map_timestamp(city_id=city_id)
-                            push_city_timestamp_query = (
-                                insert(CityTimestamp)
-                                .values(**city_timestamp)
-                            )
-                            await push_session.execute(push_city_timestamp_query)
+    async def get_or_create_city(self, push_session: AsyncSession, city: CityModelScheme) -> int:
+        try:
+            existing_city = await push_session.execute(select(CityModel.id).where(CityModel.name == city.name))
+            city_id = existing_city.scalar_one_or_none()
+            if city_id is None:
+                city_id = await self.create_city(push_session, city)
+            return city_id
+        except Exception as err:
+            print(1, 2, err)
 
-                        #  MainWeather
-                        push_mainweather_query = (
-                            insert(MainWeather)
-                            .values(city_id=city_id, **main_weather[0])
+    async def create_city(self, push_session: AsyncSession, city) -> int:
+        city_query = insert(CityModel).values(**city.model_dump()).returning(CityModel.id)
+        city_query_result = await push_session.execute(city_query)
+        city_id = city_query_result.scalar()
+        city_timestamp = self.data_mapper_link.map_timestamp(city_id=city_id)
+        await push_session.execute(insert(CityTimestamp).values(**city_timestamp.model_dump()))
+        return city_id
 
-                        )
-                        await push_session.execute(push_mainweather_query)
+    @staticmethod
+    async def update_city_timestamp(push_session: AsyncSession, city_id: int) -> None:
 
-                        #  ExtraWeather
-                        extra_weather = self.data_mapper_link.map_extra_weather(
-                            weather_data=main_weather[1],
-                            city_id=city_id,
-                        )
-                        push_extraweather_query = (
-                            insert(ExtraWeather)
-                            .values(**extra_weather)
-                        )
-                        await push_session.execute(push_extraweather_query)
-                    await push_session.commit()
-                    # End of Transaction
-                except:
-                    #  TODO handle this
-                    ...
+        city_timestamp_query = (
+            update(CityTimestamp)
+            .where(CityTimestamp.city_id == city_id)
+            .values(
+                updated_at=datetime.utcnow(),
+            )
+        )
+        await push_session.execute(city_timestamp_query)
+
+    @staticmethod
+    async def push_main_weather(push_session: AsyncSession, city_id: int, main_weather) -> None:
+        main_weather_query = (
+            insert(MainWeather)
+            .values(city_id=city_id, **main_weather)
+        )
+        await push_session.execute(main_weather_query)
+
+    async def push_extra_weather(self, push_session: AsyncSession, city_id: int, extra_weather) -> None:
+        extra_weather_viable = self.data_mapper_link.map_extra_weather(extra_weather, city_id=city_id)
+        extra_weather_query = (
+            insert(ExtraWeather)
+            .values(**extra_weather_viable.model_dump())
+        )
+        await push_session.execute(extra_weather_query)
