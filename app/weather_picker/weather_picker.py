@@ -23,9 +23,7 @@ class WeatherPicker(ABC):
 
 class WeatherPickerWithSubscription(WeatherPicker):
     """Using aiohttp library"""
-
-    def __init__(self):
-        self._session = ClientSession()
+    # _session = ClientSession()
 
     @staticmethod
     async def fetch_weather(aio_session: ClientSession, current_url: str) -> WeatherDataSchemeFromOpenWeather:
@@ -36,25 +34,26 @@ class WeatherPickerWithSubscription(WeatherPicker):
             else:
                 logger.warning(f"API is alive, but request[{current_url}] had failed.")
 
-    @functools.lru_cache(maxsize=50)
-    async def receive_weather_data(self, api_key: str) -> list[WeatherDataSchemeFromOpenWeather]:
+
+    async def receive_weather_data(cls, api_key: str) -> list[WeatherDataSchemeFromOpenWeather]:
         """Note that subscription gives asynchronous weather collecting, so it's faster"""
 
         # weather_data contains the only successful responses from openweather
         # Failed response does not push into weather_data
         weather_data: list[WeatherDataSchemeFromOpenWeather] = []
-        async with self._session:
+        async with ClientSession() as session:
             try:
                 tasks = []
-                for city in cities.get_largest_cities_names(5):
-                    url = self._url.format(city_name=city, api_key=api_key)
-                    tasks.append(asyncio.create_task(self.fetch_weather(self._session, url)))
+                for city in cities.get_largest_cities_names(1):
+                    url = cls._url.format(city_name=city, api_key=api_key)
+                    tasks.append(asyncio.create_task(cls.fetch_weather(session, url)))
                 responses = await asyncio.gather(*tasks)  # type ignore
 
                 for response in responses:
                     response: WeatherDataSchemeFromOpenWeather
                     if response is not None:
                         weather_data.append(response)
+
                 return weather_data
             except ClientError as client_err:
                 logger.critical(f"Some error occurred while picking weather. \n", exc_info=client_err)
@@ -64,7 +63,7 @@ class WeatherPickerWithSubscription(WeatherPicker):
 class WeatherPickerWithoutSubscription(WeatherPicker):
     """Using request library"""
 
-    @functools.lru_cache(maxsize=50)
+
     def receive_weather_data(self, api_key: str) -> list[WeatherDataSchemeFromOpenWeather]:
         """Default weather picker version. Slow but free"""
 
