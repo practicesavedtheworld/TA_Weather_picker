@@ -3,3 +3,5 @@ DB_PASSWORD=postgres
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=pg_db
+
+OPENWEATHERAPI_KEY=eb6ce92e849aaa6fd4d4f7c98960a0a6
