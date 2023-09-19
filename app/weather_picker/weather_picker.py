@@ -1,5 +1,4 @@
 import asyncio
-import functools
 from abc import ABC, abstractmethod
 
 from aiohttp import ClientError, ClientSession
@@ -23,7 +22,6 @@ class WeatherPicker(ABC):
 
 class WeatherPickerWithSubscription(WeatherPicker):
     """Using aiohttp library"""
-    # _session = ClientSession()
 
     @staticmethod
     async def fetch_weather(aio_session: ClientSession, current_url: str) -> WeatherDataSchemeFromOpenWeather:
@@ -34,7 +32,7 @@ class WeatherPickerWithSubscription(WeatherPicker):
             else:
                 logger.warning(f"API is alive, but request[{current_url}] had failed.")
 
-
+    @classmethod
     async def receive_weather_data(cls, api_key: str) -> list[WeatherDataSchemeFromOpenWeather]:
         """Note that subscription gives asynchronous weather collecting, so it's faster"""
 
@@ -62,7 +60,6 @@ class WeatherPickerWithSubscription(WeatherPicker):
 
 class WeatherPickerWithoutSubscription(WeatherPicker):
     """Using request library"""
-
 
     def receive_weather_data(self, api_key: str) -> list[WeatherDataSchemeFromOpenWeather]:
         """Default weather picker version. Slow but free"""
