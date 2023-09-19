@@ -7,6 +7,7 @@ from requests import get, ConnectionError, HTTPError
 
 from app.cities import cities
 from app.config import create_logger
+from app.exceptions import PickerConnectionError, PickerClientError
 from app.weather_picker import WeatherDataSchemeFromOpenWeather
 
 logger = create_logger("weather_picker_logger", logger_level="INFO")
@@ -27,9 +28,9 @@ class WeatherPickerWithSubscription(WeatherPicker):
         self._session = ClientSession()
 
     @staticmethod
-    async def fetch_weather(aio_session, current_url) -> WeatherDataSchemeFromOpenWeather:
+    async def fetch_weather(aio_session: ClientSession, current_url: str) -> WeatherDataSchemeFromOpenWeather:
         async with aio_session.get(current_url) as response:
-            if response.status == 200:
+            if response.ok:
                 weather = await response.json()
                 return WeatherDataSchemeFromOpenWeather(**weather)
             else:
@@ -45,7 +46,7 @@ class WeatherPickerWithSubscription(WeatherPicker):
         async with self._session:
             try:
                 tasks = []
-                for city in cities.get_largest_cities_names():
+                for city in cities.get_largest_cities_names(5):
                     url = self._url.format(city_name=city, api_key=api_key)
                     tasks.append(asyncio.create_task(self.fetch_weather(self._session, url)))
                 responses = await asyncio.gather(*tasks)  # type ignore
@@ -56,8 +57,8 @@ class WeatherPickerWithSubscription(WeatherPicker):
                         weather_data.append(response)
                 return weather_data
             except ClientError as client_err:
-                # TODO: add custom exception handling
-                logger.critical(f"Some error occurred while picking weather. \nDetails: {client_err}")
+                logger.critical(f"Some error occurred while picking weather. \n", exc_info=client_err)
+                raise PickerClientError(exc_details=str(client_err))
 
 
 class WeatherPickerWithoutSubscription(WeatherPicker):
@@ -69,15 +70,15 @@ class WeatherPickerWithoutSubscription(WeatherPicker):
 
         # weather_data contains the only successful responses from openweather
         # Failed response does not push into weather_data
-        weather_data = []
+        weather_data: list[WeatherDataSchemeFromOpenWeather] = []
         try:
             for city in cities.get_largest_cities_names():
                 url = self._url.format(city_name=city, api_key=api_key)
                 response = get(url)
-                if response.status_code == 200:
+                if response.ok:
                     weather = WeatherDataSchemeFromOpenWeather(**response.json())
                     weather_data.append(weather)
             return weather_data
         except (HTTPError, ConnectionError) as req_err:
-            # TODO: add custom exception handling
-            logger.error(f"Connection refused or there is some HTTP error: {req_err}")
+            logger.error(f"Connection refused or there is some HTTP error", exc_info=req_err)
+            raise PickerConnectionError(exc_details=str(req_err))
