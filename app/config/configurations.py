@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     DB_PORT: str
     DB_NAME: str
     DB_URL: str | None = None
+    OPENWEATHERAPI_KEY: str | None = None
 
     model_config = SettingsConfigDict(
         #  File priority direction is from right to left side
