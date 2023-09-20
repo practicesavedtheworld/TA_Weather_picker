@@ -62,10 +62,3 @@ class ExtraWeatherScheme(BaseModel):
     visibility: int
     wind: dict[str, FLOAT_OR_INT]
     recorded_at: datetime
-
-
-
-# class WindCondition:
-#     degree: FLOAT_OR_INT = Field(default=0, ge=0, lt=361)
-#     gust: FLOAT_OR_INT = Field(default=0., ge=0)
-#     speed: FLOAT_OR_INT = Field(ge=0)
