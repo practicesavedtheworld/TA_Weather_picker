@@ -1,1 +1,1 @@
-from .schemas import WeatherDataSchemeFromOpenWeather
+from .schemas import *
