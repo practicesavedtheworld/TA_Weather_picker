@@ -200,6 +200,7 @@ class WeatherLoaderToDatabase(CRUDWeatherDAO):
                 raise
 
     async def get_or_create_city(self, push_session: AsyncSession, city: CityModelScheme) -> int:
+        """Return city id; if it doesn't exist create city and try return id again."""
         try:
             existing_city = await push_session.execute(select(CityModel.id).where(CityModel.name == city.name))
             city_id = existing_city.scalar_one_or_none()
@@ -211,6 +212,8 @@ class WeatherLoaderToDatabase(CRUDWeatherDAO):
             raise
 
     async def create_city(self, push_session: AsyncSession, city) -> int:
+        """Add city to database if it's not there"""
+
         try:
             city_query = insert(CityModel).values(**city.model_dump()).returning(CityModel.id)
             city_query_result = await push_session.execute(city_query)
@@ -228,6 +231,7 @@ class WeatherLoaderToDatabase(CRUDWeatherDAO):
             push_session: AsyncSession,
             city_id: int,
     ) -> None:
+        """Once weather received, we update date when city got last update. """
         try:
             city_timestamp_query = (
                 update(CityTimestamp)
@@ -247,6 +251,7 @@ class WeatherLoaderToDatabase(CRUDWeatherDAO):
             city_id: int,
             main_weather: dict,
     ) -> None:
+        """Push weather for current city or update it if it's already exist."""
         try:
             weather_exist = await push_session.execute(select(MainWeather).where(MainWeather.city_id == city_id))
 
@@ -272,6 +277,7 @@ class WeatherLoaderToDatabase(CRUDWeatherDAO):
             city_id: int,
             extra_weather: WeatherDataSchemeFromOpenWeather,
     ) -> None:
+        """Store all cities extra weather for statistic"""
         try:
             extra_weather_viable = self.data_mapper_link.map_extra_weather(extra_weather, city_id=city_id)
             extra_weather_query = (
