@@ -54,7 +54,7 @@ class Cities(WorldCities):
         return self.sort_cities_by_population(largest_cities)[-quantity:]
 
     @functools.lru_cache(maxsize=20)
-    def get_largest_cities_names(self, quantity: int = 100, min_population: int = 1_000_000) -> list[s]:
+    def get_largest_cities_names(self, quantity: int = 100, min_population: int = 1_000_000) -> list[str]:
         """Getting a list of names of the largest cities"""
 
         return [
