@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class PickerExceptions(BaseException):
+class BasePickerExceptions(BaseException):
     message: str = "Some error occurred"
     exc_details: str = "Details..."
 
@@ -14,11 +14,11 @@ class PickerExceptions(BaseException):
 
 
 @dataclass
-class PickerConnectionError(PickerExceptions):
+class PickerConnectionError(BasePickerExceptions):
     message: str = "Connection refused"
 
 
 @dataclass
-class PickerClientError(PickerExceptions):
+class PickerClientError(BasePickerExceptions):
     message: str = "Session is broken"
 
