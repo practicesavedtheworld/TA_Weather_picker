@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import insert, exists, select, update
+from sqlalchemy import insert, select, update
 from sqlalchemy.exc import SQLAlchemyError, DBAPIError, OperationalError
 
 from app.config import session, create_logger
@@ -18,7 +18,6 @@ logger = create_logger(
 )
 
 
-#  TODO handler, docstring, crud logic
 
 class CityDataMapper(ABC):
 
