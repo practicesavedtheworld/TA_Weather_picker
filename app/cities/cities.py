@@ -44,8 +44,10 @@ class Cities(WorldCities):
         According to the Earth population ~8_000_000_000, min_population param default is 1_000_000.
         When you need more that top 1000 cities, you may need to decrease the min_population param.
         The more cities you get, the less min_population you set"""
-
-        assert quantity > 0, NoCitiesSelected(exc_details=f"Your city quantity is {quantity}. Change it")
+        try:
+            assert quantity > 0
+        except AssertionError:
+            raise NoCitiesSelected(exc_details=f"Your city quantity is {quantity}. Change it")
         largest_cities: Iterator[dict] = (
             city for city in self.world_cities.values()
             if city["population"] >= min_population
