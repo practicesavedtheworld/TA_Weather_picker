@@ -5,6 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import ValidationError
 
 from app.config import create_logger
+from app.exceptions import FailedDownloadProjectSettings
 
 BASE_DIR: Path = Path(__file__).parent.parent.parent
 logger = create_logger(
@@ -48,4 +49,4 @@ try:
     logger.info("Settings parse complete")
 except ValidationError as settings_err:
     logger.critical("Settings does not match. Further application normal work is impossible", exc_info=settings_err)
-    # TODO  add custom exception
+    raise FailedDownloadProjectSettings(exc_details=str(settings_err))
