@@ -4,6 +4,14 @@ from abc import ABC, abstractmethod
 
 import geonamescache
 
+from app.exceptions import NoCitiesSelected
+from app.config import create_logger
+
+logger = create_logger(
+    logger_name="cities_logger",
+    logger_level="DEBUG",
+)
+
 
 class WorldCities(ABC):
     _cities_instance: Optional["WorldCities"] = None
@@ -37,16 +45,18 @@ class Cities(WorldCities):
         When you need more that top 1000 cities, you may need to decrease the min_population param.
         The more cities you get, the less min_population you set"""
 
-        assert quantity > 0  # TODO add custom exception, log
+        assert quantity > 0, NoCitiesSelected(exc_details=f"Your city quantity is {quantity}. Change it")
         largest_cities: Iterator[dict] = (
             city for city in self.world_cities.values()
             if city["population"] >= min_population
         )
-
+        logger.debug(f"Successfully receive {quantity} largest city")
         return self.sort_cities_by_population(largest_cities)[-quantity:]
 
     @functools.lru_cache(maxsize=20)
-    def get_largest_cities_names(self, quantity: int = 100, min_population: int = 1_000_000) -> list[dict]:
+    def get_largest_cities_names(self, quantity: int = 100, min_population: int = 1_000_000) -> list[s]:
+        """Getting a list of names of the largest cities"""
+
         return [
             city["name"] for city in self.get_largest_cities_by_quantity(
                 quantity=quantity,
@@ -57,6 +67,6 @@ class Cities(WorldCities):
 
 try:
     cities = Cities()
-except:
-    #  TODO handle tnhis
-    ...
+except Exception as init_err:
+    logger.debug("Couldn't create Cities instance", exc_info=init_err)
+    raise
