@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Self
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import ValidationError
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.config import create_logger
 from app.exceptions import FailedDownloadProjectSettings
@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     DB_NAME: str
     DB_URL: str | None = None
     OPENWEATHERAPI_KEY: str | None = None
+
+    POSTGRES_DB: str
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
 
     model_config = SettingsConfigDict(
         #  File priority direction is from right to left side
@@ -48,5 +52,8 @@ try:
     settings = Settings()
     logger.info("Settings parse complete")
 except ValidationError as settings_err:
-    logger.critical("Settings does not match. Further application normal work is impossible", exc_info=settings_err)
+    logger.critical(
+        "Settings does not match. Further application normal work is impossible",
+        exc_info=settings_err,
+    )
     raise FailedDownloadProjectSettings(exc_details=str(settings_err))
