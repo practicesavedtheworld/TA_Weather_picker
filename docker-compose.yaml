@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  database:
+    container_name: database_container
+    image: postgres:15-alpine3.18
+    restart: always
+    env_file:
+      - .test_env
+    ports:
+      - "5433:5432"
+    networks:
+      - picker_network
+
+
+  test_runner:
+    container_name: test_runner
+    build:
+      context: .
+    command: pytest ./tests -v
+    networks:
+      - picker_network
+
+  alembic_runner:
+    container_name: alembic_runner
+    build:
+      context: .
+    command: alembic upgrade head
+    networks:
+      - picker_network
+
+  weather_picker:
+    container_name: weather_picker
+    build:
+      context: .
+    depends_on:
+      - database
+      - test_runner
+      - alembic_runner
+    networks:
+      - picker_network
+
+networks:
+  picker_network:
