@@ -40,7 +40,7 @@ class WorldCities(ABC):
 
 class Cities(WorldCities):
     def get_largest_cities_by_quantity(
-        self, quantity: int = 100, min_population: int = 1_000_000
+            self, quantity: int = 100, min_population: int = 1_000_000
     ) -> list[dict]:
         """Receive the largest cities in the world according to
         geonamescache library data.
@@ -66,17 +66,22 @@ class Cities(WorldCities):
 
     @functools.lru_cache(maxsize=20)
     def get_largest_cities_names(
-        self, quantity: int = 100, min_population: int = 1_000_000
+            self, quantity: int = 100, min_population: int = 1_000_000
     ) -> list[str]:
         """Getting a list of names of the largest cities"""
 
-        return [
+        largest_cities = [
             city["name"]
             for city in self.get_largest_cities_by_quantity(
                 quantity=quantity,
                 min_population=min_population,
             )
         ]
+        # Fix grammar error in geocache library for Chittagong
+        for idx, city in enumerate(largest_cities):
+            if city == "Chattogram":
+                largest_cities[idx] = "Chittagong"
+        return largest_cities
 
 
 try:
