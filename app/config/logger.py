@@ -1,15 +1,14 @@
-from os import PathLike
-from typing import TypeAlias, Literal
 import logging
 import sys
+from os import PathLike
 
 from app.types import LogLevel
 
 
 def create_logger(
-        logger_name: str,
-        logger_level: int | LogLevel = 20,
-        file_name: PathLike | str | None = None,
+    logger_name: str,
+    logger_level: int | LogLevel = 20,
+    file_name: PathLike | str | None = None,
 ) -> logging.Logger:
     """Create flexible logger, that can handle with different levels. Also,
     it can write log into the file or stdout."""
