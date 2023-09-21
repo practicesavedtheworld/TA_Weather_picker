@@ -15,4 +15,6 @@ class BaseConfigExceptions(BaseException):
 
 @dataclass
 class FailedDownloadProjectSettings(BaseConfigExceptions):
-    message: str = "Setting isn't download. It's validation error or env file does not exist"
+    message: str = (
+        "Setting isn't download. It's validation error or env file does not exist"
+    )

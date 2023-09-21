@@ -21,4 +21,3 @@ class PickerConnectionError(BasePickerExceptions):
 @dataclass
 class PickerClientError(BasePickerExceptions):
     message: str = "Session is broken"
-

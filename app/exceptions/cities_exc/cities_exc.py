@@ -16,4 +16,3 @@ class BaseCitiesExceptions(BaseException):
 @dataclass
 class NoCitiesSelected(BaseCitiesExceptions):
     message = "At least one city must be selected. Now city quantity is <= 0"
-
