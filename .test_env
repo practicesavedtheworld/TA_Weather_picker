@@ -1,7 +1,11 @@
 DB_USER=postgres
 DB_PASSWORD=postgres
-DB_HOST=localhost
+DB_HOST=database
 DB_PORT=5432
 DB_NAME=pg_db
+
+POSTGRES_DB=pg_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
 
 OPENWEATHERAPI_KEY=PUT_YOUR_API_KEY
