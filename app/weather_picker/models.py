@@ -1,9 +1,9 @@
 from typing import Annotated
 
-from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
-from app.types import SQL_FLOAT, Base, Coordinates, Now, SQL_INT, SQL_JSON
+from app.types import SQL_FLOAT, SQL_INT, SQL_JSON, Base, Coordinates, Now
 
 
 class BaseWeather(Base):

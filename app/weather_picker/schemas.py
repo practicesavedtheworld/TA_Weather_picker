@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from app.types import Float, FLOAT_OR_INT
+from app.types import FLOAT_OR_INT, Float
 
 
 class Coordinates(BaseModel):

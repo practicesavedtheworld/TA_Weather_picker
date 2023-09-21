@@ -3,24 +3,29 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from pydantic import ValidationError
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import insert, select, update
-from sqlalchemy.exc import SQLAlchemyError, DBAPIError, OperationalError
+from sqlalchemy.exc import DBAPIError, OperationalError, SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import session, create_logger
-from app.weather_picker import WeatherDataSchemeFromOpenWeather, CityModelScheme, CityTimestampScheme, \
-    MainWeatherScheme, ExtraWeatherScheme
-from app.weather_picker.models import CityModel, CityTimestamp, MainWeather, ExtraWeather
-
-logger = create_logger(
-    logger_name="database_logger",
-    logger_level="DEBUG"
+from app.config import create_logger, session
+from app.weather_picker import (
+    CityModelScheme,
+    CityTimestampScheme,
+    ExtraWeatherScheme,
+    MainWeatherScheme,
+    WeatherDataSchemeFromOpenWeather,
+)
+from app.weather_picker.models import (
+    CityModel,
+    CityTimestamp,
+    ExtraWeather,
+    MainWeather,
 )
 
+logger = create_logger(logger_name="database_logger", logger_level="DEBUG")
 
 
 class CityDataMapper(ABC):
-
     @staticmethod
     @abstractmethod
     def map_city(weather_data: WeatherDataSchemeFromOpenWeather) -> CityModelScheme:
@@ -34,31 +39,29 @@ class CityDataMapper(ABC):
     @staticmethod
     @abstractmethod
     def map_main_weather(
-            weather_data: WeatherDataSchemeFromOpenWeather
-    ) -> tuple[
-        MainWeatherScheme,
-        WeatherDataSchemeFromOpenWeather,
-    ]:
+        weather_data: WeatherDataSchemeFromOpenWeather,
+    ) -> tuple[MainWeatherScheme, WeatherDataSchemeFromOpenWeather,]:
         ...
 
     @staticmethod
     @abstractmethod
     def map_extra_weather(
-            weather_data: WeatherDataSchemeFromOpenWeather,
-            city_id: int,
+        weather_data: WeatherDataSchemeFromOpenWeather,
+        city_id: int,
     ) -> ExtraWeatherScheme:
         ...
 
 
 class CityDataMapperImpl(CityDataMapper):
-
     @staticmethod
     def map_city(weather_data: WeatherDataSchemeFromOpenWeather) -> CityModelScheme:
-        """Create city scheme and validate fields with pydantic. """
+        """Create city scheme and validate fields with pydantic."""
 
         name = weather_data.name
         city_coordinates: dict[str, float] = weather_data.coord.model_dump()
-        longitude, latitude = city_coordinates.get("lon", 0.), city_coordinates.get("lat", 0.)
+        longitude, latitude = city_coordinates.get("lon", 0.0), city_coordinates.get(
+            "lat", 0.0
+        )
         country = weather_data.sys.get("country")
 
         return CityModelScheme(
@@ -67,7 +70,8 @@ class CityDataMapperImpl(CityDataMapper):
                 latitude=latitude,
                 longitude=longitude,
                 country=country,
-            ))
+            )
+        )
 
     @staticmethod
     def map_timestamp(city_id: int) -> CityTimestampScheme:
@@ -83,17 +87,16 @@ class CityDataMapperImpl(CityDataMapper):
 
     @staticmethod
     def map_main_weather(
-            weather_data: WeatherDataSchemeFromOpenWeather,
-    ) -> tuple[
-        MainWeatherScheme,
-        WeatherDataSchemeFromOpenWeather,
-    ]:
-        """Create main weather scheme and validate fields with pydantic. """
+        weather_data: WeatherDataSchemeFromOpenWeather,
+    ) -> tuple[MainWeatherScheme, WeatherDataSchemeFromOpenWeather,]:
+        """Create main weather scheme and validate fields with pydantic."""
 
         return weather_data.model_dump().get("main"), weather_data
 
     @staticmethod
-    def map_extra_weather(weather_data: WeatherDataSchemeFromOpenWeather, city_id: int) -> ExtraWeatherScheme:
+    def map_extra_weather(
+        weather_data: WeatherDataSchemeFromOpenWeather, city_id: int
+    ) -> ExtraWeatherScheme:
         """Create extra weather scheme and validate fields with pydantic."""
 
         return ExtraWeatherScheme(
@@ -102,7 +105,8 @@ class CityDataMapperImpl(CityDataMapper):
                 visibility=weather_data.visibility,
                 wind=weather_data.wind,
                 recorded_at=datetime.utcnow(),
-            ))
+            )
+        )
 
 
 @dataclass
@@ -110,20 +114,22 @@ class BaseWeatherDatabase:
     weather: list[WeatherDataSchemeFromOpenWeather]
     client_session: AsyncSession = session
     weather_data: list[
-                      tuple[
-                          CityModelScheme,
-                          tuple[
-                              MainWeatherScheme,
-                              WeatherDataSchemeFromOpenWeather,
-                          ],
-                      ],
-                  ] | None = None
+        tuple[
+            CityModelScheme,
+            tuple[
+                MainWeatherScheme,
+                WeatherDataSchemeFromOpenWeather,
+            ],
+        ],
+    ] | None = None
     city_data_mapper = CityDataMapperImpl()
 
     def __post_init__(self) -> None:
         self.weather_data = self.gain_viable_weather_data()
 
-    def gain_viable_weather_data(self) -> list[
+    def gain_viable_weather_data(
+        self,
+    ) -> list[
         tuple[
             CityModelScheme,
             tuple[
@@ -132,7 +138,8 @@ class BaseWeatherDatabase:
             ],
         ]
     ]:
-        """Viable means that only few fields from openweatherapi will include in return value."""
+        """Viable means that only few fields from openweatherapi
+        will include in return value."""
 
         weather_data = []
         for weather in self.weather:
@@ -150,7 +157,6 @@ class CRUDWeatherDAO:
     def __init__(self, weather: list[WeatherDataSchemeFromOpenWeather]) -> None:
         self.base_weather: BaseWeatherDatabase = BaseWeatherDatabase(
             weather=weather,
-
         )
         self.weather_data = self.base_weather.weather_data
         self.data_mapper_link = self.base_weather.city_data_mapper
@@ -160,16 +166,16 @@ class CRUDWeatherDAO:
 ##          Insert / Update Operations           ##
 ###################################################
 
-class WeatherLoaderToDatabase(CRUDWeatherDAO):
 
+class WeatherLoaderToDatabase(CRUDWeatherDAO):
     async def push_weather_to_db(self) -> None:
         """Add weather to database.
 
-         Does these steps as transaction for each city in list of cities:
-         1) Identify city(gets id). If city doesn't exist create it
-         2) Note city timestamp
-         3) Add main weather for current city
-         4) Add extra weather for current city"""
+        Does these steps as transaction for each city in list of cities:
+        1) Identify city(gets id). If city doesn't exist create it
+        2) Note city timestamp
+        3) Add main weather for current city
+        4) Add extra weather for current city"""
 
         async with self.base_weather.client_session as push_session:
             try:
@@ -179,18 +185,28 @@ class WeatherLoaderToDatabase(CRUDWeatherDAO):
                         async with push_session.begin():
                             city_id = await self.get_or_create_city(push_session, city)
                             await self.update_city_timestamp(push_session, city_id)
-                            await self.push_main_weather(push_session, city_id, main_weather[0])
-                            await self.push_extra_weather(push_session, city_id, main_weather[1])
+                            await self.push_main_weather(
+                                push_session, city_id, main_weather[0]
+                            )
+                            await self.push_extra_weather(
+                                push_session, city_id, main_weather[1]
+                            )
                         #  End Transaction
                     except OperationalError as db_conn_err:
                         logger.debug("Can't connect to database", exc_info=db_conn_err)
                         raise
                     except DBAPIError as db_err:
-                        logger.debug("The execution of a database operation fails", exc_info=db_err)
+                        logger.debug(
+                            "The execution of a database operation fails",
+                            exc_info=db_err,
+                        )
                         raise
                     except SQLAlchemyError as tran_err:
-                        logger.debug(f"Problem occur with city {city} and weather{main_weather}."
-                                     f"Skip this city...", exc_info=tran_err)
+                        logger.debug(
+                            f"Problem occur with city {city} and weather{main_weather}."
+                            f"Skip this city...",
+                            exc_info=tran_err,
+                        )
                         raise
             except KeyboardInterrupt:
                 logger.debug("STOPPED MANUALLY")
@@ -199,27 +215,38 @@ class WeatherLoaderToDatabase(CRUDWeatherDAO):
                 logger.debug("Cant handle city's weather", exc_info=err)
                 raise
 
-    async def get_or_create_city(self, push_session: AsyncSession, city: CityModelScheme) -> int:
+    async def get_or_create_city(
+        self, push_session: AsyncSession, city: CityModelScheme
+    ) -> int:
         """Return city id; if it doesn't exist create city and try return id again."""
         try:
-            existing_city = await push_session.execute(select(CityModel.id).where(CityModel.name == city.name))
+            existing_city = await push_session.execute(
+                select(CityModel.id).where(CityModel.name == city.name)
+            )
             city_id = existing_city.scalar_one_or_none()
             if city_id is None:
                 city_id = await self.create_city(push_session, city)
             return city_id
         except (SQLAlchemyError, ValidationError) as err:
-            logger.debug("Failed attempt to create city or scheme isn't relevant to db model", exc_info=err)
+            logger.debug(
+                "Failed attempt to create city or scheme isn't relevant to db model",
+                exc_info=err,
+            )
             raise
 
     async def create_city(self, push_session: AsyncSession, city) -> int:
         """Add city to database if it's not there"""
 
         try:
-            city_query = insert(CityModel).values(**city.model_dump()).returning(CityModel.id)
+            city_query = (
+                insert(CityModel).values(**city.model_dump()).returning(CityModel.id)
+            )
             city_query_result = await push_session.execute(city_query)
             city_id = city_query_result.scalar()
             city_timestamp = self.data_mapper_link.map_timestamp(city_id=city_id)
-            await push_session.execute(insert(CityTimestamp).values(**city_timestamp.model_dump()))
+            await push_session.execute(
+                insert(CityTimestamp).values(**city_timestamp.model_dump())
+            )
             return city_id
         except ValidationError as v_err:
             logger.debug("Scheme isn't relevant to db model", exc_info=v_err)
@@ -228,10 +255,10 @@ class WeatherLoaderToDatabase(CRUDWeatherDAO):
 
     @staticmethod
     async def update_city_timestamp(
-            push_session: AsyncSession,
-            city_id: int,
+        push_session: AsyncSession,
+        city_id: int,
     ) -> None:
-        """Once weather received, we update date when city got last update. """
+        """Once weather received, we update date when city got last update."""
         try:
             city_timestamp_query = (
                 update(CityTimestamp)
@@ -247,18 +274,19 @@ class WeatherLoaderToDatabase(CRUDWeatherDAO):
 
     @staticmethod
     async def push_main_weather(
-            push_session: AsyncSession,
-            city_id: int,
-            main_weather: dict,
+        push_session: AsyncSession,
+        city_id: int,
+        main_weather: dict,
     ) -> None:
         """Push weather for current city or update it if it's already exist."""
         try:
-            weather_exist = await push_session.execute(select(MainWeather).where(MainWeather.city_id == city_id))
+            weather_exist = await push_session.execute(
+                select(MainWeather).where(MainWeather.city_id == city_id)
+            )
 
             if not weather_exist.scalar_one_or_none():
-                main_weather_query = (
-                    insert(MainWeather)
-                    .values(city_id=city_id, **main_weather)
+                main_weather_query = insert(MainWeather).values(
+                    city_id=city_id, **main_weather
                 )
             else:
                 main_weather_query = (
@@ -272,17 +300,18 @@ class WeatherLoaderToDatabase(CRUDWeatherDAO):
             raise
 
     async def push_extra_weather(
-            self,
-            push_session: AsyncSession,
-            city_id: int,
-            extra_weather: WeatherDataSchemeFromOpenWeather,
+        self,
+        push_session: AsyncSession,
+        city_id: int,
+        extra_weather: WeatherDataSchemeFromOpenWeather,
     ) -> None:
         """Store all cities extra weather for statistic"""
         try:
-            extra_weather_viable = self.data_mapper_link.map_extra_weather(extra_weather, city_id=city_id)
-            extra_weather_query = (
-                insert(ExtraWeather)
-                .values(**extra_weather_viable.model_dump())
+            extra_weather_viable = self.data_mapper_link.map_extra_weather(
+                extra_weather, city_id=city_id
+            )
+            extra_weather_query = insert(ExtraWeather).values(
+                **extra_weather_viable.model_dump()
             )
             await push_session.execute(extra_weather_query)
         except SQLAlchemyError as err:
@@ -302,6 +331,7 @@ class WeatherDeleterFromDatabase(CRUDWeatherDAO):
 ###################################################
 ##               Read Operations                 ##
 ###################################################
+
 
 class WeatherReaderFromDatabase(CRUDWeatherDAO):
     ...
