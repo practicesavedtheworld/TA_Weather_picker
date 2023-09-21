@@ -1,6 +1,14 @@
 # TA_Weather_picker
 My attempt for test assignment
+##
 
+## What is Weather picker
+![weather](https://github.com/practicesavedtheworld/TA_Weather_picker/assets/105741091/6c17a725-4934-4da8-b01d-09d34156a15e)
+
+Wheather picker is a programm that collect weather using OpenWeather API
+
+
+##
 
 ## Requirements
 The only things you need:
@@ -37,7 +45,9 @@ Just change the value in `collect.sh` file
 
 
 <code><b>python3 collect.py --with-sub --interval=24</b></code>
+
 Now it's collect weather every 24 hours.
+
 &#9888; Note that script must running on background
 ##
 
