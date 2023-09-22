@@ -56,6 +56,25 @@ Good luck
 
 ##
 
+## Technologies
+
+
+![](https://img.shields.io/badge/python/3.10.4?color=blue)
+
+![](https://img.shields.io/badge/python-3.11-blue)
+![](https://img.shields.io/badge/SQLAlchemy-2.0.20-orange)
+![](https://img.shields.io/badge/aiohttp-3.8.5-blue)
+![](https://img.shields.io/badge/alembic-1.12.0-orange)
+![](https://img.shields.io/badge/pydantic-2.3.0-orange)
+![](https://img.shields.io/badge/requests-2.31.0-blue)
+![](https://img.shields.io/badge/APScheduler-3.10.4-orange)
+
+##
+
+![](https://img.shields.io/badge/black-23.9.1-blue)
+![](https://img.shields.io/badge/flake8-6.1.0-blue)
+![](https://img.shields.io/badge/isort-5.12.0-blue)
+
 ## What is Weather picker
 ![weather](https://github.com/practicesavedtheworld/TA_Weather_picker/assets/105741091/6c17a725-4934-4da8-b01d-09d34156a15e)
 
@@ -148,4 +167,24 @@ Now it's collect weather every 24 hours.
 ##
 
 ## Run as a python script
+
+
+1. ```sh
+   git clone https://github.com/practicesavedtheworld/TA_Weather_picker
+   ```
+2. ```sh
+   cd TA_Weather_picker
+   pip install requirements.txt
+   ```
+
+3. Paste your API key in .test_env. Field ` OPENWEATHERAPI_KEY= `.
+You can get API key after registration on https://openweathermap.org/
+
+&#9888; Note: Without OpenWeather API Key it won't work
+
+4. Run
+```sh
+   python3 collect.py --with-sub --interval=1
+```
+
 
