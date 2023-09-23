@@ -85,7 +85,7 @@ Application has 2 different way of collection:
 
 The main diffence between them is collecting speed.
 
-&#9888; Note that this educational project and sub mode is ebanle by just added `--with-sub` flag.
+&#9888; Note that this is an educational project and sub mode is enable by just added `--with-sub` flag.
 
 Weather data is entered into a database. The database looks like
 ![Database](https://github.com/practicesavedtheworld/TA_Weather_picker/assets/105741091/d10d2daa-e203-4017-93a7-65975fd1000f)
@@ -112,6 +112,17 @@ The entire program runs in Docker. When you run the collector, it starts the dat
 
 
 ##
+
+## Restrictions
+
+- Depends on OpenWeather API. How many request you can send to OpenWeather and actually get response?
+
+Free account allows you to send up to 1000 request per day. So keep it in mind.
+- Does not handle with duplicate city names for now. For example Barcelona(Venezuela) and Barcelona(Spain) will be handle as one city.
+
+
+##
+
 
 ## Requirements
 The only things you need:
