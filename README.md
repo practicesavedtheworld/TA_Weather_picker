@@ -13,7 +13,7 @@ The business challenge sounds like this:
 "We need to have weather data in the 100 largest cities in the world, based on this data we will manage the capacity of Data Centers in terms of cooling and load"
 
 Clarification of the task from the lead:
-"Write a Collector (an entity responsible for collecting statistics) for https://openweathermap.org/, which should each collect weather information for the 100 largest cities in the world, and then save the value in the database. When collecting, pay attention to side data, which can be obtained, can we use them for something? When writing, keep in mind that the code may change frequently, so you should think about expanding it and further supporting it. The choice of technologies is at your discretion."
+"Write a Collector (an entity responsible for collecting statistics) for https://openweathermap.org/, which should each hour collect weather information for the 100 largest cities in the world, and then save the value in the database. When collecting, pay attention to side data, which can be obtained, can we use them for something? When writing, keep in mind that the code may change frequently, so you should think about expanding it and further supporting it. The choice of technologies is at your discretion."
 
 
 Optional:
@@ -36,7 +36,7 @@ Good luck
 "Нам нужно иметь данные о погоде в 100 крупнейших городах мира, на основании этих данных мы будем управлять мощностями Дата-центров в плане охлаждения и нагрузки "
 
 Уточнение задачи от лида:
-"Напиши Коллектор (сущность, отвечающую за сбор и статистики) для https://openweathermap.org/, который должен каждый собирать информацию о погоде для 100 крупнейших городов мира, после чего сохранять значение в БД. При сборе обрати внимание на побочные данные, которые можно получить, можем ли мы их для чего-то использовать? При написании следует учитывать, что код может часто меняться, поэтому следует подумать о его расширении и дальнейшей поддержке. Выбор технологий на твое усмотрение."
+"Напиши Коллектор (сущность, отвечающую за сбор и статистики) для https://openweathermap.org/, который должен каждый час собирать информацию о погоде для 100 крупнейших городов мира, после чего сохранять значение в БД. При сборе обрати внимание на побочные данные, которые можно получить, можем ли мы их для чего-то использовать? При написании следует учитывать, что код может часто меняться, поэтому следует подумать о его расширении и дальнейшей поддержке. Выбор технологий на твое усмотрение."
 
 
 Опционально:
