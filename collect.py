@@ -1,11 +1,13 @@
 import asyncio
 import sys
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 from app.exceptions import FailedDownloadProjectSettings
 from app.weather_picker.weather_picker import WeatherPickerWithSubscription, WeatherPickerWithoutSubscription
 from app.weather_picker.weather_dao import WeatherLoaderToDatabase
 from app.config import create_logger
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 
 logger = create_logger(
     logger_name="collector_logger",
