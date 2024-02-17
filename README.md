@@ -108,7 +108,7 @@ The entire program runs in Docker. When you run the collector, it starts the dat
 
 
 
-![Снимок экрана от 2023-09-21 22-20-47](https://github.com/practicesavedtheworld/TA_Weather_picker/assets/105741091/7bacc9dd-620f-4e18-a7b3-cf4ac2a3b0dc)
+![fwe4](https://github.com/practicesavedtheworld/TA_Weather_picker/assets/105741091/7bacc9dd-620f-4e18-a7b3-cf4ac2a3b0dc)
 
 
 ##
@@ -142,7 +142,7 @@ The quick run start collecting weather for the 100 largest cities every 1 hour b
    ```
 2. ```sh
    cd TA_Weather_picker
-   pip install requirements.txt
+   pip install -r requirements.txt
    ```
 
 3. Paste your API key in .test_env. Field ` OPENWEATHERAPI_KEY= `.
@@ -185,7 +185,7 @@ Now it's collect weather every 24 hours.
    ```
 2. ```sh
    cd TA_Weather_picker
-   pip install requirements.txt
+   pip install -r requirements.txt
    ```
 
 3. Paste your API key in .test_env. Field ` OPENWEATHERAPI_KEY= `.
